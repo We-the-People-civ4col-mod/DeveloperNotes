@@ -11,7 +11,7 @@ This is a community empowered mod that is based on the [Religion and Revolution 
 
 * *As a player*: 
   * please check the [ideas](https://github.com/We-the-People-civ4col-mod/Mod/issues?q=is%3Aopen+is%3Aissue+milestone%3AIDEA) and upvote / downvote them (for that , you will need to register to github).
-  * Also, be welcome to report new issues and your ideas! 
+  * Also, be welcome to report new issues and your ideas! All things you would want to be fixed and/or new features to be implemented  are reported as "issues" on github : you can create a new one here : [new issue on the "Mod" project](https://github.com/We-the-People-civ4col-mod/Mod/issues/new).
 
 * *As an issue moderator*: we need people to help us triage the issues: identify if the issue is a duplicate, and then add them to proper milestones. Also, to identify ideas that have enough approvals for being planned into production. [More details...](howToModerate.md)
 
