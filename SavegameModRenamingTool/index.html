@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title></title>
+	<meta name="robots" content="noindex, nofollow">
+	<meta name="googlebot" content="noindex, nofollow">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" href="/css/result-light.css">
+	<style type="text/css">
+		h1{
+			padding: 50px;
+			border: solid 1px;
+			margin: 5px;
+		}
+		#formTemplate,
+		#invisibleDownloadLink
+		{
+			 visibility: hidden;
+		}
+		#form input{
+			width: 100%;
+		}
+	</style>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript">
+		function EventHandler_stopping (event)
+		{
+			event.preventDefault();
+			event.stopPropagation();
+		}
+
+		function onLoadFileHandler (event)
+		{
+			//Get the file contents
+			var buffer = event.target.result;
+			//Convert to single byte array
+			var aFile = new Uint8Array(buffer);
+			//Extract the length of the modpath string
+			var aSize = aFile.subarray(4,5);
+			//Extract the modpath string
+			var aName = aFile.subarray(8,8+aSize[0]);
+			//decode the modpath
+			var name = new TextDecoder("utf-8").decode(aName);
+			//display data
+			var output = $("#result");
+			output.append("modpath: "+name+"<br />"+"Lenght: "+aSize[0]+" bytes"+"<br />");
+
+			//display input form
+			output.append($("#formTemplate").clone().attr("id","form"));
+			var form = $("#form");
+			var input = form.find("input");
+			input.val(name);
+			var button = form.find("button");
+
+			//handle button click
+			button.on('click',function onClickHandler(event)
+			{
+				//Get the input and encode it
+				var strInput = input.val();
+				var encoder = new TextEncoder("utf-8");
+				var aInput = encoder.encode(strInput);
+
+				//Assemble a new blob from the original file and the input
+				var size = aFile.length-aSize[0]+aInput.length;
+				var aFileNew = new Uint8Array(size);
+				aFileNew.set(aFile.subarray(0,4),0);
+				aFileNew.set([aInput.length],4);
+				aFileNew.set(aFile.subarray(5,8),5);
+				aFileNew.set(aInput,8);
+				aFileNew.set(aFile.subarray(8+aSize[0],aFile.lenght),8+aInput.length);
+				var blob = new Blob([aFileNew.buffer],{type: 'application/octet-stream'});
+
+				//Use a hidden link to trigger a SaveAs dialog
+				var link = form.find("#invisibleDownloadLink").get()[0];
+				var url = window.URL.createObjectURL(blob);
+				link.href = url;
+				link.download = "test_simura.ColonizationSave";
+				link.click();
+				window.URL.revokeObjectURL(url);
+			});
+		}
+
+		function onDropHandler (event)
+		{
+			if(event.originalEvent.dataTransfer != null && event.originalEvent.dataTransfer.files.length > 0)
+			{
+				EventHandler_stopping(event);
+
+				var file = event.originalEvent.dataTransfer.files[0];
+				$("#result").html("filename: "+file.name+"<br />");
+				var reader = new FileReader();
+				reader.onload = onLoadFileHandler;
+				reader.readAsArrayBuffer(file);
+			}
+		}
+
+		$(function()
+		{
+			$('#dropzone').on('dragover dragenter', EventHandler_stopping);
+			$('#dropzone').on('drop', onDropHandler);
+		});
+
+	</script>
+	</head>
+	<body>
+		<h1 id="dropzone">Drop the savegame onto this element</h1>
+		<div id="result"></div>
+		<div id="formTemplate">
+			<input type="text" id="modPath"><br />
+			<button type="button">Change mod path & save a copy</button>
+			<a id="invisibleDownloadLink"></a>
+		</div>
+	</body>
+</html>
