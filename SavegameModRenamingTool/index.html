@@ -3,16 +3,18 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-	<title></title>
+    <title>Civilization 4: Colonization savegame mod renaming tool</title>
 	<meta name="robots" content="noindex, nofollow">
 	<meta name="googlebot" content="noindex, nofollow">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" type="text/css" href="/css/result-light.css">
 	<style type="text/css">
-		h1{
+		div#dropzone{
 			padding: 50px;
 			border: solid 1px;
 			margin: 5px;
+			width: 40%;
+			font-size: 40px;
 		}
 		#formTemplate,
 		#invisibleDownloadLink
@@ -22,18 +24,40 @@
 		#form input{
 			width: 100%;
 		}
+        div#jsWarning {
+            display: block;
+            border-width: 3px;
+            border-color: red;
+            border-style: solid;
+            padding: 5px;
+        }
+        div#tool
+        {
+            display:none;
+        }
 	</style>
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 	<script type="text/javascript">
+
+        //This function stops the normal flow of eventhandling for a given event
 		function EventHandler_stopping (event)
 		{
 			event.preventDefault();
 			event.stopPropagation();
 		}
 
+        //This function is called when the contents of the file have been read
 		function onLoadFileHandler (event)
 		{
-			//Get the file contents
+		    //Store the filename for later use
+		    var filename;
+		    if (this.hasOwnProperty('file') && this.file != null) {
+		        filename = this.file.name;
+		    }
+		    else {
+		        filename = "newFile.ColonizationSave";
+		    }
+		    //Get the file contents
 			var buffer = event.target.result;
 			//Convert to single byte array
 			var aFile = new Uint8Array(buffer);
@@ -45,7 +69,8 @@
 			var name = new TextDecoder("utf-8").decode(aName);
 			//display data
 			var output = $("#result");
-			output.append("modpath: "+name+"<br />"+"Lenght: "+aSize[0]+" bytes"+"<br />");
+			//output.append("Mod path string found: '"+name+"'<br />"+"Lenght: "+aSize[0]+" bytes"+"<br />");
+			output.append("Mod path string found: '" + name + "'<br /><br />");
 
 			//display input form
 			output.append($("#formTemplate").clone().attr("id","form"));
@@ -53,7 +78,7 @@
 			var input = form.find("input");
 			input.val(name);
 			var button = form.find("button");
-
+			alert(this.file.name);
 			//handle button click
 			button.on('click',function onClickHandler(event)
 			{
@@ -76,41 +101,103 @@
 				var link = form.find("#invisibleDownloadLink").get()[0];
 				var url = window.URL.createObjectURL(blob);
 				link.href = url;
-				link.download = "test_simura.ColonizationSave";
+				link.download = filename;
 				link.click();
 				window.URL.revokeObjectURL(url);
 			});
 		}
 
+        //This function handles the event when a file was dropped on the dropzone
 		function onDropHandler (event)
 		{
 			if(event.originalEvent.dataTransfer != null && event.originalEvent.dataTransfer.files.length > 0)
 			{
+                //Let's stop the normal flow of event handling as we don't need it
 				EventHandler_stopping(event);
 
+                //Display the filename to the user
 				var file = event.originalEvent.dataTransfer.files[0];
-				$("#result").html("filename: "+file.name+"<br />");
+				$("#result").html("Filename: '" + file.name + "'<br />");
+                //Read the file contents
 				var reader = new FileReader();
-				reader.onload = onLoadFileHandler;
-				reader.readAsArrayBuffer(file);
+                    //Attach the file object to the reader. This way it will be accessible within the eventhandler.
+				    reader.file = file;
+                    //Add an event handler for when the file is loaded.
+				    reader.onload = onLoadFileHandler;
+                    //Read the file
+				    reader.readAsArrayBuffer(file);
 			}
 		}
 
 		$(function()
 		{
-			$('#dropzone').on('dragover dragenter', EventHandler_stopping);
+		    //Remove the javascript warning and display the tool
+		    $('#jsWarning').hide(0);
+		    $('#tool').show(0);
+            //Disable the event handling for events we are not interested in
+		    $('#dropzone').on('dragover dragenter', EventHandler_stopping);
+            //Add a handler for the event we are interested in
 			$('#dropzone').on('drop', onDropHandler);
 		});
 
 	</script>
 	</head>
 	<body>
-		<h1 id="dropzone">Drop the savegame onto this element</h1>
-		<div id="result"></div>
-		<div id="formTemplate">
-			<input type="text" id="modPath"><br />
-			<button type="button">Change mod path & save a copy</button>
-			<a id="invisibleDownloadLink"></a>
+		<h1>Civilization 4: Colonization savegame mod renaming tool</h1>
+        <ul>
+            <li>This tool allows to change the mod path in any Civilization 4: Colonization savegame (and most likely in any Civilization 4 savegame).</li>
+            <li>It only uses javascript and runs solely locally in your webbrowser.</li>
+            <li>The savegame you provide will not be changed, just read. The tool will assemble a new file from the file you provided and your additional inputs.</li>
+            <li>If you have any issues with or any ideas for this tool, please open an issue here: <a href="https://github.com/We-the-People-civ4col-mod/DeveloperNotes/issues" target="_blank">https://github.com/We-the-People-civ4col-mod/DeveloperNotes/issues</a></li>
+        </ul>
+        <div id="jsWarning">
+            You need to enable javascript to use this tool.
+            <script>
+                document.getElementById("jsWarning").style.display = "none";
+            </script>
+        </div>
+        <div id="tool">
+            How it works:
+            <ol>
+                <li>Drop the savegame on to the dropzone.</li>
+                <li>The tool will display some data about it to you, including the mod path.</li>
+                <li>You then can change the mod path to the string you desire.</li>
+                <li>After that you click a button to save the newly generated file.</li>
+            </ol>
+            <div id="dropzone" class="dropzone">Drop your savegame here</div>
+            <div id="result">
+
+            </div>
+            <div id="formTemplate">
+                If you want to change the mod path, enter your changes here:
+                <input type="text" id="modPath"><br />
+                <button type="button">Change mod path & save new file</button>
+                <a id="invisibleDownloadLink"></a>
+            </div>
+        </div>
+		<div id="main">
+			<div id="left" class="column">
+				<div class="background">
+					<div class="explanation engraved">
+					</div>
+					<div class="mpInput">
+					</div>
+					<div class="separator">
+					</div>
+					<div class="explanation engraved">
+					</div>
+					<div id="mpInputTemplate" class="mpInput">
+					</div>
+				</div>
+			</div>
+			<div id="right" class="column">
+				<div class="background">
+					<div class="explanation engraved">
+					</div>
+					<div class="explanation">
+					</div>
+				</div>
+			</div>
 		</div>
 	</body>
 </html>
