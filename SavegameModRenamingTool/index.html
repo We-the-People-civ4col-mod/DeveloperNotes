@@ -9,10 +9,12 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" type="text/css" href="/css/result-light.css">
 	<style type="text/css">
-		h1{
+		div.dropzone{
 			padding: 50px;
 			border: solid 1px;
 			margin: 5px;
+			width: 40%;
+			font-size: 40px;
 		}
 		#formTemplate,
 		#invisibleDownloadLink
@@ -98,19 +100,49 @@
 
 		$(function()
 		{
-			$('#dropzone').on('dragover dragenter', EventHandler_stopping);
-			$('#dropzone').on('drop', onDropHandler);
+			$('#dropzoneChange').on('dragover dragenter', EventHandler_stopping);
+			$('#dropzoneChange').on('drop', onDropHandler);
 		});
 
 	</script>
 	</head>
 	<body>
-		<h1 id="dropzone">Drop the savegame onto this element</h1>
+		<h1>WTP savegame mod renaming tool</h1>
+		<ol>
+			<li>Drop savegame</li>
+			<li>Enter new mod path</li>
+			<li>Save copy</li>
+		</ol>
+		<div id="dropzoneChange" class="dropzone">Drop savegame to change here</div>
 		<div id="result"></div>
 		<div id="formTemplate">
 			<input type="text" id="modPath"><br />
 			<button type="button">Change mod path & save a copy</button>
 			<a id="invisibleDownloadLink"></a>
+		</div>
+		<div id="main">
+			<div id="left" class="column">
+				<div class="background">
+					<div class="explanation engraved">
+					</div>
+					<div class="mpInput">
+					</div>
+					<div class="separator">
+					</div>
+					<div class="explanation engraved">
+					</div>
+					<div id="mpInputTemplate" class="mpInput">
+					</div>
+				</div>
+			</div>
+			<div id="right" class="column">
+				<div class="background">
+					<div class="explanation engraved">
+					</div>
+					<div class="explanation">
+					</div>
+				</div>
+			</div>
 		</div>
 	</body>
 </html>
